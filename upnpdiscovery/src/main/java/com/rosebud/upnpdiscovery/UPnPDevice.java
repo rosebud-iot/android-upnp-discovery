@@ -6,6 +6,8 @@ import com.stanfy.gsonxml.XmlParserCreator;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import java.util.Objects;
+
 public class UPnPDevice {
 
     private static String LOCATION_TEXT = "LOCATION: ";
@@ -207,4 +209,19 @@ public class UPnPDevice {
     public String getURLBase() {
         return mURLBase;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UPnPDevice that = (UPnPDevice) o;
+        return Objects.equals(mHostAddress, that.mHostAddress) &&
+                Objects.equals(mFriendlyName, that.mFriendlyName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mHostAddress, mFriendlyName);
+    }
+
 }
