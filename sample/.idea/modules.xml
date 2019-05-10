@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../android-upnp-discovery.iml" filepath="$PROJECT_DIR$/../android-upnp-discovery.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sample.iml" filepath="$PROJECT_DIR$/sample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../upnpdiscovery/upnpdiscovery.iml" filepath="$PROJECT_DIR$/../upnpdiscovery/upnpdiscovery.iml" />
+    </modules>
+  </component>
+</project>
