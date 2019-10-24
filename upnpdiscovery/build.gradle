@@ -1,6 +1,35 @@
+import com.amazonaws.auth.policy.Policy
+import com.amazonaws.auth.policy.Principal
+import com.amazonaws.auth.policy.Statement
+import com.amazonaws.auth.policy.actions.S3Actions
+import com.amazonaws.auth.policy.resources.S3BucketResource
+import com.amazonaws.auth.policy.resources.S3ObjectResource
+import jp.classmethod.aws.gradle.s3.BucketPolicyTask
+import jp.classmethod.aws.gradle.s3.CreateBucketTask
 apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
+apply plugin: 'jp.classmethod.aws'
+apply plugin: 'jp.classmethod.aws.s3'
 
+task create(type: CreateBucketTask) {
+    bucketName "sweepr-partner-nexus-repository"
+    region 'us-west-1'
+    ifNotExists true
+}
+
+task setBucketPolicy(type: BucketPolicyTask, dependsOn: create) {
+    bucketName "sweepr-partner-nexus-repository"
+    policy new Policy().withStatements(
+            new Statement(Statement.Effect.Allow)
+                    .withPrincipals(Principal.AllUsers)
+                    .withActions(S3Actions.GetObject)
+                    .withResources(new S3ObjectResource("sweepr-partner-nexus-repository", '*')),
+            new Statement(Statement.Effect.Allow)
+                    .withPrincipals(Principal.AllUsers)
+                    .withActions(S3Actions.ListObjects)
+                    .withResources(new S3BucketResource("sweepr-partner-nexus-repository"))
+    )
+}
 android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
@@ -30,6 +59,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     implementation 'com.android.support:appcompat-v7:26.0.2'
+    implementation 'io.resourcepool:ssdp-client:2.2.0'
     implementation 'com.android.volley:volley:1.1.0'
     implementation 'com.stanfy:gson-xml-java:0.1.+'
     testImplementation'junit:junit:4.12'
@@ -37,12 +67,24 @@ dependencies {
 
 publish {
     userOrg = ''
-    groupId = 'com.github.rosebud-iot'
+    groupId = 'com.sweepr'
     artifactId = 'upnpdiscovery'
-    publishVersion = '1.0.5'
+    publishVersion = '1.0.6'
     desc = 'Discovery UPnP devices via SSDP protocol'
     licences = ['MIT']
-    uploadName = 'Android-uPnP-Discovery'
+    uploadName = 'upnpdiscovery'
     website = 'https://github.com/rosebud-iot/android-upnp-discovery.git'
+}
+
+publishing {
+    repositories {
+        maven {
+            url "s3://sweepr-partner-nexus-repository/releases"
+            credentials(AwsCredentials) {
+                accessKey awsCredentials.AWSAccessKeyId
+                secretKey awsCredentials.AWSSecretKey
+            }
+        }
+    }
 }
 
