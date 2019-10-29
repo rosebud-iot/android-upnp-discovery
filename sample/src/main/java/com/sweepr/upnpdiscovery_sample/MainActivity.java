@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onServiceDiscovered(SsdpService service) {
                 Log.d("Discovery", "Service " + service.toString());
-                UPnPDevice deviceDiscovered = new UPnPDevice(service.getRemoteIp().getHostAddress(), service.getLocation(), service.getSerialNumber(), service.getServiceType());
+                UPnPDevice deviceDiscovered = new UPnPDevice(service.getRemoteIp().getHostAddress(), service.getLocation(), service.getSerialNumber(), service.getServiceType(), mContext);
                 UPnPDiscovery.getDataFrom(service.getLocation(), deviceDiscovered, mContext, new ResultHandler<UPnPDevice>() {
                     @Override
                     public void onSuccess(UPnPDevice data) {

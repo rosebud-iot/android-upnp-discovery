@@ -1,13 +1,22 @@
 package com.sweepr.upnpdiscovery;
 
+import android.content.Context;
+
+import com.google.gson.JsonSyntaxException;
 import com.stanfy.gsonxml.GsonXml;
 import com.stanfy.gsonxml.GsonXmlBuilder;
 import com.stanfy.gsonxml.XmlParserCreator;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.util.Objects;
+
+import io.sentry.Sentry;
+import io.sentry.android.AndroidSentryClientFactory;
+import io.sentry.event.BreadcrumbBuilder;
+import io.sentry.event.UserBuilder;
 
 public class UPnPDevice {
 
@@ -43,21 +52,23 @@ public class UPnPDevice {
     private String mUDN;
     private String mURLBase;
 
-    public UPnPDevice(String hostAddress, String header) {
+    public UPnPDevice(String hostAddress, String header, Context context) {
         this.mHeader = header;
         this.mHostAddress = hostAddress;
         this.mLocation = parseHeader(header, LOCATION_TEXT);
         this.mServer = parseHeader(header, SERVER_TEXT);
         this.mUSN = parseHeader(header, USN_TEXT);
         this.mST = parseHeader(header, ST_TEXT);
+        Sentry.init("https://71c4b3f6a9b646c992175aa6cc095c08@sentry.io/1781718", new AndroidSentryClientFactory(context));
     }
 
-    public UPnPDevice(String hostAddress, String location, String serialnumber, String serviceType) {
+    public UPnPDevice(String hostAddress, String location, String serialnumber, String serviceType, Context context) {
         this.mHostAddress = hostAddress;
         this.mLocation = location;
         this.mUSN = serialnumber;
         this.mST = serviceType;
         this.mServer = "";
+        Sentry.init("https://71c4b3f6a9b646c992175aa6cc095c08@sentry.io/1781718", new AndroidSentryClientFactory(context));
     }
 
     public void update(String xml) {
@@ -96,6 +107,7 @@ public class UPnPDevice {
     }
 
     private void xmlParse(String xml) {
+
         XmlParserCreator parserCreator = new XmlParserCreator() {
             @Override
             public XmlPullParser createParser() {
@@ -110,21 +122,43 @@ public class UPnPDevice {
         GsonXml gsonXml = new GsonXmlBuilder()
                 .setXmlParserCreator(parserCreator)
                 .create();
+        /*
+         Record a breadcrumb in the current context which will be sent
+         with the next event(s). By default the last 100 breadcrumbs are kept.
+         */
+        Sentry.getContext().recordBreadcrumb(
+                new BreadcrumbBuilder().setMessage("User made an action").build()
+        );
 
+        // Set the user in the current context.
+        Sentry.getContext().setUser(
+                new UserBuilder().setEmail("hello@sentry.io").build()
+        );
+        DescriptionModel model = null;
+        try {
+            model = gsonXml.fromXml(xml, DescriptionModel.class);
+        } catch (JsonSyntaxException e) {
+            Sentry.capture(e);
+            e.printStackTrace();
+        } catch (Exception e) {
+            Sentry.capture(e);
+            e.printStackTrace();
+        }
 
-        DescriptionModel model = gsonXml.fromXml(xml, DescriptionModel.class);
+        if (model != null) {
+            this.mFriendlyName = model.device.friendlyName == null ? "" : model.device.friendlyName;
+            this.mDeviceType = model.device.deviceType == null ? "" : model.device.deviceType;
+            this.mPresentationURL = model.device.presentationURL == null ? "" : model.device.presentationURL;
+            this.mSerialNumber = model.device.serialNumber == null ? "" : model.device.serialNumber;
+            this.mModelName = model.device.modelName == null ? "" : model.device.modelName;
+            this.mModelNumber = model.device.modelNumber == null ? "" : model.device.modelNumber;
+            this.mModelURL = model.device.modelURL == null ? "" : model.device.modelURL;
+            this.mManufacturer = model.device.manufacturer == null ? "" : model.device.manufacturer;
+            this.mManufacturerURL = model.device.manufacturerURL == null ? "" : model.device.manufacturerURL;
+            this.mUDN = model.device.UDN == null ? "" : model.device.UDN;
+            this.mURLBase = model.URLBase == null ? "" : model.URLBase;
+        }
 
-        this.mFriendlyName = model.device.friendlyName == null ? "" : model.device.friendlyName;
-        this.mDeviceType = model.device.deviceType == null ? "" : model.device.deviceType;
-        this.mPresentationURL = model.device.presentationURL == null ? "" : model.device.presentationURL;
-        this.mSerialNumber = model.device.serialNumber == null ? "" : model.device.serialNumber;
-        this.mModelName = model.device.modelName == null ? "" : model.device.modelName;
-        this.mModelNumber = model.device.modelNumber == null ? "" : model.device.modelNumber;
-        this.mModelURL = model.device.modelURL == null ? "" : model.device.modelURL;
-        this.mManufacturer = model.device.manufacturer == null ? "" : model.device.manufacturer;
-        this.mManufacturerURL = model.device.manufacturerURL == null ? "" : model.device.manufacturerURL;
-        this.mUDN = model.device.UDN == null ? "" : model.device.UDN;
-        this.mURLBase = model.URLBase == null ? "" : model.URLBase;
     }
 
     private static class Device {

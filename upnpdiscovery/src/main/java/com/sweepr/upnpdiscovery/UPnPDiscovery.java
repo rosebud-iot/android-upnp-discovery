@@ -113,7 +113,7 @@ public class UPnPDiscovery extends AsyncTask {
                     String response = new String(datagramPacket.getData(), 0, datagramPacket.getLength());
 
                     if (response.substring(0, 12).toUpperCase().equals("HTTP/1.1 200")) {
-                        UPnPDevice device = new UPnPDevice(datagramPacket.getAddress().getHostAddress(), response);
+                        UPnPDevice device = new UPnPDevice(datagramPacket.getAddress().getHostAddress(), response, mContext);
                         mTheardsCount++;
 
                         getData(device.getLocation(), device);
