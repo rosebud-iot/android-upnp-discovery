@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         final SsdpClient client = SsdpClient.create();
         DiscoveryRequest all = SsdpRequest.discoverAll();
         DiscoveryRequest dial = DiscoveryRequest.builder()
-                .serviceType("urn:dial-multiscreen-org:service:dial:1")
+                .serviceType("ssdp:all")
                 .build();
 
         client.discoverServices(dial, new DiscoveryListener() {

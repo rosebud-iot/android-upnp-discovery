@@ -13,10 +13,6 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.util.Objects;
 
-import io.sentry.Sentry;
-import io.sentry.android.AndroidSentryClientFactory;
-import io.sentry.event.BreadcrumbBuilder;
-import io.sentry.event.UserBuilder;
 
 public class UPnPDevice {
 
@@ -59,7 +55,6 @@ public class UPnPDevice {
         this.mServer = parseHeader(header, SERVER_TEXT);
         this.mUSN = parseHeader(header, USN_TEXT);
         this.mST = parseHeader(header, ST_TEXT);
-        Sentry.init("https://71c4b3f6a9b646c992175aa6cc095c08@sentry.io/1781718", new AndroidSentryClientFactory(context));
     }
 
     public UPnPDevice(String hostAddress, String location, String serialnumber, String serviceType, Context context) {
@@ -68,7 +63,6 @@ public class UPnPDevice {
         this.mUSN = serialnumber;
         this.mST = serviceType;
         this.mServer = "";
-        Sentry.init("https://71c4b3f6a9b646c992175aa6cc095c08@sentry.io/1781718", new AndroidSentryClientFactory(context));
     }
 
     public void update(String xml) {
@@ -107,7 +101,6 @@ public class UPnPDevice {
     }
 
     private void xmlParse(String xml) {
-
         XmlParserCreator parserCreator = new XmlParserCreator() {
             @Override
             public XmlPullParser createParser() {
@@ -122,26 +115,12 @@ public class UPnPDevice {
         GsonXml gsonXml = new GsonXmlBuilder()
                 .setXmlParserCreator(parserCreator)
                 .create();
-        /*
-         Record a breadcrumb in the current context which will be sent
-         with the next event(s). By default the last 100 breadcrumbs are kept.
-         */
-        Sentry.getContext().recordBreadcrumb(
-                new BreadcrumbBuilder().setMessage("User made an action").build()
-        );
-
-        // Set the user in the current context.
-        Sentry.getContext().setUser(
-                new UserBuilder().setEmail("hello@sentry.io").build()
-        );
         DescriptionModel model = null;
         try {
             model = gsonXml.fromXml(xml, DescriptionModel.class);
         } catch (JsonSyntaxException e) {
-            Sentry.capture(e);
             e.printStackTrace();
         } catch (Exception e) {
-            Sentry.capture(e);
             e.printStackTrace();
         }
 
@@ -251,20 +230,6 @@ public class UPnPDevice {
 
     public String getURLBase() {
         return mURLBase;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UPnPDevice that = (UPnPDevice) o;
-        return Objects.equals(mHostAddress, that.mHostAddress) &&
-                Objects.equals(mFriendlyName, that.mFriendlyName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(mHostAddress, mFriendlyName);
     }
 
 }

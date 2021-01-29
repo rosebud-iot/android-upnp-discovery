@@ -78,19 +78,23 @@ public class UPnPDiscovery extends AsyncTask {
 
     @Override
     protected Object doInBackground(Object[] params) {
+        Log.e("DoBackground", "We enter");
+        Log.d("DoBackground", "Enter in background " + mTheardsCount);
         mActivity.runOnUiThread(new Runnable() {
             public void run() {
                 mListener.OnStart();
             }
         });
-        WifiManager wifi = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifi = null;
         if (wifi != null) {
-            Log.d("Gazi", "Lock wifi" + mTheardsCount);
+            Log.d("DoBackground", "Lock wifi " + mTheardsCount);
             WifiManager.MulticastLock lock = wifi.createMulticastLock("The Lock");
-            lock.acquire();
+            if(!lock.isHeld()) {
+                lock.acquire();
+            }
             DatagramSocket socket = null;
             try {
-                Log.d("Gazi", "try" + mTheardsCount);
+                Log.d("DoBackground", "Try " + mTheardsCount);
                 InetAddress group = InetAddress.getByName(mInetAddress);
                 int port = mPort;
                 String query = mCustomQuery;
@@ -139,9 +143,7 @@ public class UPnPDiscovery extends AsyncTask {
     }
 
     private void getData(final String url, final UPnPDevice device) {
-        Log.d("URL", "Esto es la " + url);
         if (url != null && !url.equals("")) {
-            Log.d("URL", "Entro" + url);
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override
@@ -174,7 +176,7 @@ public class UPnPDiscovery extends AsyncTask {
 
     public static void getDataFrom(final String url, final UPnPDevice device, Context context, final ResultHandler<UPnPDevice> result) {
         if (url != null && !url.equals("")) {
-            Log.d("URL", "Entro" + url);
+            Log.d("URL", "GetDataFrom " + url);
             StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override

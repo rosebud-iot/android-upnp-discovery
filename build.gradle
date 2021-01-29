@@ -1,30 +1,38 @@
-import com.amazonaws.auth.profile.ProfileCredentialsProvider
+
 buildscript {
     repositories {
         google()
         jcenter()
-
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.1'
-        classpath "jp.classmethod.aws:gradle-aws-plugin:0.31"
-        classpath 'com.novoda:bintray-release:0.9.1'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
+        classpath "com.github.alexfu:androidautoversion:3.3.0"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
 }
-ext {
-    awsCredentials = new ProfileCredentialsProvider().credentials
-}
+
 allprojects {
     repositories {
         google()
         jcenter()
         maven {
-            url "s3://sweepr-partner-nexus-repository/releases"
-            credentials(AwsCredentials) {
-                accessKey awsCredentials.AWSAccessKeyId
-                secretKey awsCredentials.AWSSecretKey
+            name = "GitHubPackages"
+            /** Configure path of your package repository on Github
+             ** Replace GITHUB_USERID with your/organisation Github userID
+             ** and REPOSITORY with the repository name on GitHub
+             */
+            url = uri("https://maven.pkg.github.com/rosebud-iot/android-upnp-discovery")
+            credentials {
+                /** Create github.properties in root project folder file with
+                 ** gpr.usr=GITHUB_USER_ID & gpr.key=PERSONAL_ACCESS_TOKEN
+                 ** Set env variable GPR_USER & GPR_API_KEY if not adding a properties file**/
+
+                username = System.getenv("GPR_USER")
+                password = System.getenv("GPR_API_KEY")
             }
         }
     }

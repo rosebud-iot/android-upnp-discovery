@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.android.support:support-media-compat:26.0.2@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-media-compat-26.0.2.aar/9b1e288375b76bbf574e02ac94a31242/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/support-media-compat-26.0.2.aar/9b1e288375b76bbf574e02ac94a31242/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/76d5d7388faf78422941d16de14f3b6f/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/76d5d7388faf78422941d16de14f3b6f/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
