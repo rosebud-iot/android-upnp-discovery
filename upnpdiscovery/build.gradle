@@ -2,12 +2,6 @@ apply plugin: 'com.android.library'
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.alexfu.androidautoversion'
 
-def LIB_GROUP_ID = 'io.sweepr'
-def LIB_ARTIFACT_ID = 'upnpn-discovery'
-def LIB_VERSION = androidAutoVersion.versionName
-group = 'io.sweepr'
-version = androidAutoVersion.versionName
-
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
@@ -15,8 +9,10 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 2
-        versionName "1.0.1"
+
+        versionCode androidAutoVersion.versionCode
+        versionName androidAutoVersion.versionName + "." + (System.getenv("GITHUB_RUN_ID") ?: "0")
+
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
     }
@@ -30,16 +26,14 @@ android {
         abortOnError false
     }
 }
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier "sources"
-}
+
 // Ensure that the publish task depends on assembly
 tasks.all { task ->
     if (task instanceof AbstractPublishToMaven) {
         task.dependsOn assemble
     }
 }
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -54,44 +48,56 @@ dependencies {
     testImplementation'junit:junit:4.13.2'
 }
 
+def sweeprProperties = new Properties()
+def sweeprPropertiesFile = rootProject.file("sweepr.properties")
+
+if (sweeprPropertiesFile.exists()) {
+    sweeprProperties.load(new FileInputStream(sweeprPropertiesFile))
+} else {
+    sweeprProperties.setProperty('github.username', System.getenv("GPR_USER") ?: "undefined-user")
+    sweeprProperties.setProperty('github.token', System.getenv("GPR_API_KEY") ?: "undefined-token")
+}
 
 publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            /** Configure path of your package repository on Github
-             ** Replace GITHUB_USERID with your/organisation Github userID
-             ** and REPOSITORY with the repository name on GitHub
-             */
-            url = uri("https://maven.pkg.github.com/rosebud-iot/android-upnp-discovery")
+            url = uri("https://maven.pkg.github.com/rosebud-iot/mobile-framework-android")
             credentials {
-                /** Create github.properties in root project folder file with
-                 ** gpr.usr=GITHUB_USER_ID & gpr.key=PERSONAL_ACCESS_TOKEN
-                 ** Set env variable GPR_USER & GPR_API_KEY if not adding a properties file**/
-
-                username = System.getenv("GPR_USER")
-                password = System.getenv("GPR_API_KEY")
+                username = sweeprProperties["github.username"]
+                password = sweeprProperties["github.token"]
             }
         }
     }
 
     publications {
         upnpdiscovery(MavenPublication) {
-            groupId LIB_GROUP_ID
-            artifactId LIB_ARTIFACT_ID
-            version LIB_VERSION
+            groupId 'com.sweepr'
+            artifactId 'upnpn-discovery'
+            version androidAutoVersion.versionName
+
             artifact("$buildDir/outputs/aar/upnpdiscovery-release.aar")
-            artifact(sourcesJar)
 
+            pom {
+                name = 'NetworkTest'
+                description = 'Discovery UPnP devices via SSDP protocol'
+                url = 'https://github.com/rosebud-iot/speed-test-lib.git'
+
+                licenses {
+                    license {
+                        name = 'MIT'
+                    }
+                }
+            }
+
+            // include dependencies
             pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-
-                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.api.allDependencies.each {
-                    def dependencyNode = dependenciesNode.appendNode('dependency')
-                    dependencyNode.appendNode('groupId', it.group)
-                    dependencyNode.appendNode('artifactId', it.name)
-                    dependencyNode.appendNode('version', it.version)
+                def dependencies = asNode().appendNode('dependencies')
+                configurations.getByName("releaseCompileClasspath").getResolvedConfiguration().getFirstLevelModuleDependencies().each {
+                    def dependency = dependencies.appendNode('dependency')
+                    dependency.appendNode('groupId', it.moduleGroup)
+                    dependency.appendNode('artifactId', it.moduleName)
+                    dependency.appendNode('version', it.moduleVersion)
                 }
             }
         }
