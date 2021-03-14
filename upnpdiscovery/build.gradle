@@ -45,10 +45,9 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    api 'com.android.support:appcompat-v7:30.0.2'
+    api 'androidx.appcompat:appcompat:1.2.0'
     api 'io.resourcepool:ssdp-client:2.4.3'
     api 'com.android.volley:volley:1.2.0'
-    api 'io.sentry:sentry-android:1.7.27'
     api 'org.slf4j:slf4j-nop:1.7.25'
     api 'com.stanfy:gson-xml-java:0.1.+'
 
