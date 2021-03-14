@@ -1,10 +1,14 @@
 package com.sweepr.upnpdiscovery;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -38,7 +42,7 @@ public class UPnPDiscovery extends AsyncTask {
 
     private HashSet<UPnPDevice> devices = new HashSet<>();
     private Context mContext;
-    private Activity mActivity;
+    private Handler mHandler;
     private int mTheardsCount = 0;
     private String mCustomQuery;
     private String mInetAddress;
@@ -56,9 +60,9 @@ public class UPnPDiscovery extends AsyncTask {
 
     private OnDiscoveryListener mListener;
 
-    private UPnPDiscovery(Activity activity, OnDiscoveryListener listener) {
-        mContext = activity.getApplicationContext();
-        mActivity = activity;
+    private UPnPDiscovery(@NonNull Context context, @Nullable Handler handler, OnDiscoveryListener listener) {
+        mContext = context.getApplicationContext();
+        mHandler = handler != null ? handler : new Handler(Looper.getMainLooper());
         mListener = listener;
         mTheardsCount = 0;
         mCustomQuery = DEFAULT_QUERY;
@@ -66,9 +70,9 @@ public class UPnPDiscovery extends AsyncTask {
         mPort = DEFAULT_PORT;
     }
 
-    private UPnPDiscovery(Activity activity, OnDiscoveryListener listener, String customQuery, String address, int port) {
-        mContext = activity.getApplicationContext();
-        mActivity = activity;
+    private UPnPDiscovery(@NonNull Context context, @Nullable Handler handler, OnDiscoveryListener listener, String customQuery, String address, int port) {
+        mContext = context.getApplicationContext();
+        mHandler = handler != null ? handler : new Handler(Looper.getMainLooper());
         mListener = listener;
         mTheardsCount = 0;
         mCustomQuery = customQuery;
@@ -80,7 +84,7 @@ public class UPnPDiscovery extends AsyncTask {
     protected Object doInBackground(Object[] params) {
         Log.e("DoBackground", "We enter");
         Log.d("DoBackground", "Enter in background " + mTheardsCount);
-        mActivity.runOnUiThread(new Runnable() {
+        mHandler.post(new Runnable() {
             public void run() {
                 mListener.OnStart();
             }
@@ -127,7 +131,7 @@ public class UPnPDiscovery extends AsyncTask {
 
             } catch (final IOException e) {
                 e.printStackTrace();
-                mActivity.runOnUiThread(new Runnable() {
+                mHandler.post(new Runnable() {
                     public void run() {
                         mListener.OnError(e);
                     }
@@ -153,7 +157,7 @@ public class UPnPDiscovery extends AsyncTask {
                             devices.add(device);
                             mTheardsCount--;
                             if (mTheardsCount == 0) {
-                                mActivity.runOnUiThread(new Runnable() {
+                                mHandler.post(new Runnable() {
                                     public void run() {
                                         mListener.OnFinish(devices);
                                     }
@@ -196,8 +200,8 @@ public class UPnPDiscovery extends AsyncTask {
         }
     }
 
-    public static boolean discoveryDevices(Activity activity, OnDiscoveryListener listener) {
-        UPnPDiscovery discover = new UPnPDiscovery(activity, listener);
+    public static boolean discoveryDevices(@NonNull Context context, @Nullable Handler handler, OnDiscoveryListener listener) {
+        UPnPDiscovery discover = new UPnPDiscovery(context, handler, listener);
         discover.execute();
         try {
             Thread.sleep(DISCOVER_TIMEOUT);
@@ -207,8 +211,8 @@ public class UPnPDiscovery extends AsyncTask {
         }
     }
 
-    public static boolean discoveryDevices(Activity activity, OnDiscoveryListener listener, String customQuery, String address, int port) {
-        UPnPDiscovery discover = new UPnPDiscovery(activity, listener, customQuery, address, port);
+    public static boolean discoveryDevices(@NonNull Context context, @Nullable Handler handler, OnDiscoveryListener listener, String customQuery, String address, int port) {
+        UPnPDiscovery discover = new UPnPDiscovery(context, handler, listener, customQuery, address, port);
         discover.execute();
         try {
             Thread.sleep(DISCOVER_TIMEOUT);
