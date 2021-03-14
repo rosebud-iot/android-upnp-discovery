@@ -43,28 +43,27 @@ public class UPnPDiscovery extends AsyncTask {
     private HashSet<UPnPDevice> devices = new HashSet<>();
     private Context mContext;
     private Handler mHandler;
-    private int mTheardsCount = 0;
+    private OnDiscoveryListener mListener;
+    private int mThreadsCount = 0;
     private String mCustomQuery;
     private String mInetAddress;
     private int mPort;
 
     public interface OnDiscoveryListener {
-        void OnStart();
+        void onDiscoveryStart();
 
-        void OnFoundNewDevice(UPnPDevice device);
+        void onDiscoveryFoundNewDevice(UPnPDevice device);
 
-        void OnFinish(HashSet<UPnPDevice> devices);
+        void onDiscoveryFinish(HashSet<UPnPDevice> devices);
 
-        void OnError(Exception e);
+        void onDiscoveryError(Exception e);
     }
-
-    private OnDiscoveryListener mListener;
 
     private UPnPDiscovery(@NonNull Context context, @Nullable Handler handler, OnDiscoveryListener listener) {
         mContext = context.getApplicationContext();
         mHandler = handler != null ? handler : new Handler(Looper.getMainLooper());
         mListener = listener;
-        mTheardsCount = 0;
+        mThreadsCount = 0;
         mCustomQuery = DEFAULT_QUERY;
         mInetAddress = DEFAULT_ADDRESS;
         mPort = DEFAULT_PORT;
@@ -74,7 +73,7 @@ public class UPnPDiscovery extends AsyncTask {
         mContext = context.getApplicationContext();
         mHandler = handler != null ? handler : new Handler(Looper.getMainLooper());
         mListener = listener;
-        mTheardsCount = 0;
+        mThreadsCount = 0;
         mCustomQuery = customQuery;
         mInetAddress = address;
         mPort = port;
@@ -83,22 +82,22 @@ public class UPnPDiscovery extends AsyncTask {
     @Override
     protected Object doInBackground(Object[] params) {
         Log.e("DoBackground", "We enter");
-        Log.d("DoBackground", "Enter in background " + mTheardsCount);
+        Log.d("DoBackground", "Enter in background " + mThreadsCount);
         mHandler.post(new Runnable() {
             public void run() {
-                mListener.OnStart();
+                mListener.onDiscoveryStart();
             }
         });
         WifiManager wifi = null;
         if (wifi != null) {
-            Log.d("DoBackground", "Lock wifi " + mTheardsCount);
+            Log.d("DoBackground", "Lock wifi " + mThreadsCount);
             WifiManager.MulticastLock lock = wifi.createMulticastLock("The Lock");
             if(!lock.isHeld()) {
                 lock.acquire();
             }
             DatagramSocket socket = null;
             try {
-                Log.d("DoBackground", "Try " + mTheardsCount);
+                Log.d("DoBackground", "Try " + mThreadsCount);
                 InetAddress group = InetAddress.getByName(mInetAddress);
                 int port = mPort;
                 String query = mCustomQuery;
@@ -122,7 +121,7 @@ public class UPnPDiscovery extends AsyncTask {
 
                     if (response.substring(0, 12).toUpperCase().equals("HTTP/1.1 200")) {
                         UPnPDevice device = new UPnPDevice(datagramPacket.getAddress().getHostAddress(), response, mContext);
-                        mTheardsCount++;
+                        mThreadsCount++;
 
                         getData(device.getLocation(), device);
                     }
@@ -133,7 +132,7 @@ public class UPnPDiscovery extends AsyncTask {
                 e.printStackTrace();
                 mHandler.post(new Runnable() {
                     public void run() {
-                        mListener.OnError(e);
+                        mListener.onDiscoveryError(e);
                     }
                 });
             } finally {
@@ -153,13 +152,13 @@ public class UPnPDiscovery extends AsyncTask {
                         @Override
                         public void onResponse(String response) {
                             device.update(response);
-                            mListener.OnFoundNewDevice(device);
+                            mListener.onDiscoveryFoundNewDevice(device);
                             devices.add(device);
-                            mTheardsCount--;
-                            if (mTheardsCount == 0) {
+                            mThreadsCount--;
+                            if (mThreadsCount == 0) {
                                 mHandler.post(new Runnable() {
                                     public void run() {
-                                        mListener.OnFinish(devices);
+                                        mListener.onDiscoveryFinish(devices);
                                     }
                                 });
                             }
@@ -167,15 +166,13 @@ public class UPnPDiscovery extends AsyncTask {
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    mTheardsCount--;
+                    mThreadsCount--;
                     Log.d(TAG, "URL: " + url + " get content error!");
                 }
             });
             stringRequest.setTag(TAG + "SSDP description request");
             Volley.newRequestQueue(mContext).add(stringRequest);
         }
-
-
     }
 
     public static void getDataFrom(final String url, final UPnPDevice device, Context context, final ResultHandler<UPnPDevice> result) {
