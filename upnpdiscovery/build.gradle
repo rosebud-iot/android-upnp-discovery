@@ -73,7 +73,7 @@ publishing {
     publications {
         upnpdiscovery(MavenPublication) {
             groupId 'com.sweepr'
-            artifactId 'upnpn-discovery'
+            artifactId 'upnp-discovery'
             version androidAutoVersion.versionName
 
             artifact("$buildDir/outputs/aar/upnpdiscovery-release.aar")
