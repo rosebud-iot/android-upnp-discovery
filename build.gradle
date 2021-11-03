@@ -1,12 +1,11 @@
 buildscript {
     repositories {
         google()
-        jcenter()
         mavenCentral()
         maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.2'
+        classpath 'com.android.tools.build:gradle:7.0.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5'
         classpath "com.github.alexfu:androidautoversion:3.3.0"
     }
@@ -15,7 +14,6 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
     }
     afterEvaluate {
         tasks.withType(JavaCompile) {
