@@ -59,8 +59,17 @@ if (sweeprPropertiesFile.exists()) {
 publishing {
     repositories {
         maven {
-            name = "GitHubPackages"
+            name = "GitHubInternalPackages"
             url = uri("https://maven.pkg.github.com/rosebud-iot/mobile-framework-android")
+            credentials {
+                username = sweeprProperties["github.username"]
+                password = sweeprProperties["github.token"]
+            }
+        }
+
+        maven {
+            name = "GitHubPublicPackages"
+            url = uri("https://maven.pkg.github.com/sweepr-sdk/android")
             credentials {
                 username = sweeprProperties["github.username"]
                 password = sweeprProperties["github.token"]
