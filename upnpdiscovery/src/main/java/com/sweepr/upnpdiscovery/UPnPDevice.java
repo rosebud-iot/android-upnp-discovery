@@ -1,7 +1,5 @@
 package com.sweepr.upnpdiscovery;
 
-import android.content.Context;
-
 import com.google.gson.JsonSyntaxException;
 import com.stanfy.gsonxml.GsonXml;
 import com.stanfy.gsonxml.GsonXmlBuilder;
@@ -44,7 +42,7 @@ public class UPnPDevice {
     private String mUDN;
     private String mURLBase;
 
-    public UPnPDevice(String hostAddress, String header, Context context) {
+    public UPnPDevice(String hostAddress, String header) {
         this.mHeader = header;
         this.mHostAddress = hostAddress;
         this.mLocation = parseHeader(header, LOCATION_TEXT);
@@ -53,7 +51,7 @@ public class UPnPDevice {
         this.mST = parseHeader(header, ST_TEXT);
     }
 
-    public UPnPDevice(String hostAddress, String location, String serialnumber, String serviceType, Context context) {
+    public UPnPDevice(String hostAddress, String location, String serialnumber, String serviceType) {
         this.mHostAddress = hostAddress;
         this.mLocation = location;
         this.mUSN = serialnumber;

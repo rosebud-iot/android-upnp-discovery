@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onServiceDiscovered(SsdpService service) {
                 Log.d("Discovery", "Service " + service.toString());
-                UPnPDevice deviceDiscovered = new UPnPDevice(service.getRemoteIp().getHostAddress(), service.getLocation(), service.getSerialNumber(), service.getServiceType(), mContext);
+                UPnPDevice deviceDiscovered = new UPnPDevice(service.getRemoteIp().getHostAddress(), service.getLocation(), service.getSerialNumber(), service.getServiceType());
                 UPnPDiscovery.getDataFrom(service.getLocation(), deviceDiscovered, mContext, new ResultHandler<UPnPDevice>() {
                     @Override
                     public void onSuccess(UPnPDevice data) {
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        final Handler handler = new Handler();
+        final Handler handler = new Handler(getMainLooper());
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
