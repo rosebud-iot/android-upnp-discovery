@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 33
-    buildToolsVersion "33.0.0"
+    buildToolsVersion "33.0.1"
 
     namespace "com.sweepr.upnpdiscovery_sample"
     testNamespace "com.sweepr.upnpdiscovery_sample"
@@ -30,7 +30,7 @@ dependencies {
     })
     implementation project(':upnpdiscovery')
 
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'io.resourcepool:ssdp-client:2.4.3'
 
