@@ -21,6 +21,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 public class UPnPDiscovery implements Runnable {
@@ -40,7 +41,7 @@ public class UPnPDiscovery implements Runnable {
     private static final int DEFAULT_PORT = 1900;
     private static final String DEFAULT_ADDRESS = "239.255.255.250";
 
-    private final HashSet<UPnPDevice> devices = new HashSet<>();
+    private final Set<UPnPDevice> devices = new HashSet<>();
     private final Context mContext;
     private final Handler mHandler;
     private final OnDiscoveryListener mListener;
@@ -55,11 +56,11 @@ public class UPnPDiscovery implements Runnable {
     public interface OnDiscoveryListener {
         void onDiscoveryStart();
 
-        void onDiscoveryFoundNewDevice(UPnPDevice device);
+        void onDiscoveryFoundNewDevice(@NonNull UPnPDevice device);
 
-        void onDiscoveryFinish(HashSet<UPnPDevice> devices);
+        void onDiscoveryFinish(@NonNull Set<UPnPDevice> devices);
 
-        void onDiscoveryError(Exception e);
+        void onDiscoveryError(@NonNull Exception e);
     }
 
     private UPnPDiscovery(@NonNull Context context, @Nullable Handler handler, OnDiscoveryListener listener) {
