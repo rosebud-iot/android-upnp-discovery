@@ -5,7 +5,7 @@ android {
     buildToolsVersion "33.0.1"
 
     namespace "com.sweepr.upnpdiscovery_sample"
-    testNamespace "com.sweepr.upnpdiscovery_sample"
+    testNamespace "com.sweepr.upnpdiscovery_sample.tests"
 
     defaultConfig {
         applicationId "com.rosebud.upnpdiscovery_sample"

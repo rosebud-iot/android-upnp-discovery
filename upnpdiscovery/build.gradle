@@ -7,7 +7,7 @@ android {
     buildToolsVersion "33.0.1"
 
     namespace "com.sweepr.upnpdiscovery"
-    testNamespace "com.sweepr.upnpdiscovery"
+    testNamespace "com.sweepr.upnpdiscovery.tests"
 
     defaultConfig {
         minSdkVersion 16
