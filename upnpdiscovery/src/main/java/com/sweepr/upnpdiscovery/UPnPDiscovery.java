@@ -88,7 +88,7 @@ public class UPnPDiscovery implements Runnable {
             }
         });
 
-        final WifiManager wifi = null;
+        final WifiManager wifi = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);;
         if (wifi != null) {
             Log.d(TAG, "Lock wifi " + mThreadsCount);
             WifiManager.MulticastLock lock = wifi.createMulticastLock("The Lock");
@@ -99,7 +99,7 @@ public class UPnPDiscovery implements Runnable {
             try {
                 Log.d(TAG, "Try " + mThreadsCount);
                 InetAddress group = InetAddress.getByName(mInetAddress);
-                int port = mPort;
+                final int port = mPort;
                 String query = mCustomQuery;
                 socket = new DatagramSocket(null);
                 socket.setReuseAddress(true);
