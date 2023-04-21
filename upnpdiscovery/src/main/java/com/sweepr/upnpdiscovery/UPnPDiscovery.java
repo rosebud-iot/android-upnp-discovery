@@ -50,7 +50,7 @@ public class UPnPDiscovery implements Runnable {
     private final String mInetAddress;
     private final int mPort;
 
-    private boolean mCanContinue;
+    private volatile boolean mCanContinue;
     private boolean mCanNotifyFinish;
 
     public interface OnDiscoveryListener {
