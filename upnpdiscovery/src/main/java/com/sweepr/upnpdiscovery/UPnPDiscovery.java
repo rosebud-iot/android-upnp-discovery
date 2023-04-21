@@ -49,6 +49,9 @@ public class UPnPDiscovery implements Runnable {
     private final String mInetAddress;
     private final int mPort;
 
+    private boolean mCanContinue;
+    private boolean mCanNotifyFinish;
+
     public interface OnDiscoveryListener {
         void onDiscoveryStart();
 
@@ -79,9 +82,17 @@ public class UPnPDiscovery implements Runnable {
         mPort = port;
     }
 
+    public void abort() {
+        mCanContinue = false;
+    }
+
     @Override
     public void run() {
         Log.d(TAG, "Enter in background " + mThreadsCount);
+
+        mCanContinue = true;
+        mCanNotifyFinish = true;
+
         mHandler.post(new Runnable() {
             public void run() {
                 mListener.onDiscoveryStart();
@@ -111,7 +122,7 @@ public class UPnPDiscovery implements Runnable {
 
                 final long startTime = System.currentTimeMillis();
                 long currentTime = System.currentTimeMillis();
-                while (currentTime - startTime < 1000) {
+                while (currentTime - startTime < 1000 && mCanContinue) {
 
                     final DatagramPacket datagramPacket = new DatagramPacket(new byte[1024], 1024);
                     socket.receive(datagramPacket);
@@ -138,7 +149,17 @@ public class UPnPDiscovery implements Runnable {
                 if (socket != null) {
                     socket.close();
                 }
+
+                if (mCanNotifyFinish) {
+                    mCanNotifyFinish = false;
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            mListener.onDiscoveryFinish(devices);
+                        }
+                    });
+                }
             }
+
             lock.release();
         }
     }
@@ -154,11 +175,14 @@ public class UPnPDiscovery implements Runnable {
                             devices.add(device);
                             mThreadsCount--;
                             if (mThreadsCount == 0) {
-                                mHandler.post(new Runnable() {
-                                    public void run() {
-                                        mListener.onDiscoveryFinish(devices);
-                                    }
-                                });
+                                if (mCanNotifyFinish) {
+                                    mCanNotifyFinish = false;
+                                    mHandler.post(new Runnable() {
+                                        public void run() {
+                                            mListener.onDiscoveryFinish(devices);
+                                        }
+                                    });
+                                }
                             }
                         }
                     }, new Response.ErrorListener() {
@@ -168,7 +192,7 @@ public class UPnPDiscovery implements Runnable {
                     Log.d(TAG, "URL: " + url + " get content error!");
                 }
             });
-            stringRequest.setTag(TAG + "SSDP description request");
+            stringRequest.setTag(TAG + "-SSDP description request");
             Volley.newRequestQueue(mContext).add(stringRequest);
         }
     }
@@ -190,17 +214,19 @@ public class UPnPDiscovery implements Runnable {
                     Log.d(TAG, "URL: " + url + " get content error!");
                 }
             });
-            stringRequest.setTag("URL SSDP description request");
+            stringRequest.setTag(TAG + "-SSDP description request");
             Volley.newRequestQueue(context).add(stringRequest);
         }
     }
 
-    private static boolean waitForCompletion(long timeoutMillis) {
+    private static boolean waitForCompletion(UPnPDiscovery discovery, long timeoutMillis) {
         try {
             Thread.sleep(timeoutMillis <= 0 ? DISCOVER_TIMEOUT_MILLIS : timeoutMillis);
             return true;
         } catch (InterruptedException e) {
             return false;
+        } finally {
+            discovery.abort();
         }
     }
 
@@ -210,7 +236,7 @@ public class UPnPDiscovery implements Runnable {
                                            @Nullable Handler handler, OnDiscoveryListener listener) {
         final UPnPDiscovery discovery = new UPnPDiscovery(context, handler, listener);
         executor.execute(discovery);
-        return waitForCompletion(timeoutMillis);
+        return waitForCompletion(discovery, timeoutMillis);
     }
 
     public static boolean discoveryDevices(@NonNull Context context,
@@ -220,6 +246,6 @@ public class UPnPDiscovery implements Runnable {
                                            @NonNull String customQuery, String address, int port) {
         final UPnPDiscovery discover = new UPnPDiscovery(context, handler, listener, customQuery, address, port);
         executor.execute(discover);
-        return waitForCompletion(timeoutMillis);
+        return waitForCompletion(discover, timeoutMillis);
     }
 }
