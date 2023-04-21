@@ -60,4 +60,58 @@ public class ExampleInstrumentedTest {
             }
         });
     }
+
+    @Test
+    public void parse_ssdt_device_info_with_success() {
+        final String decl = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<root xmlns=\"urn:schemas-upnp-org:device-1-0\">\n" +
+                "  <URLBase>http://192.168.1.254:80</URLBase>\n" +
+                "  <device>\n" +
+                "    <deviceType>urn:schemas-upnp-org:device:InternetGatewayDevice:1</deviceType>\n" +
+                "    <friendlyName>Ubee EVW3226</friendlyName>\n" +
+                "    <serviceList>\n" +
+                "      <service>\n" +
+                "        <serviceType>urn:schemas-upnp-org:service:Layer3Forwarding:1</serviceType>\n" +
+                "        <controlURL>/ctl/L3F</controlURL>\n" +
+                "        <eventSubURL>/evt/L3F</eventSubURL>\n" +
+                "        <SCPDURL>/L3F.xml</SCPDURL>\n" +
+                "      </service>\n" +
+                "    </serviceList>\n" +
+                "    <deviceList>\n" +
+                "      <device>\n" +
+                "        <deviceType>urn:schemas-upnp-org:device:WANDevice:1</deviceType>\n" +
+                "        <friendlyName>WANDevice</friendlyName>\n" +
+                "        <serviceList>\n" +
+                "          <service>\n" +
+                "            <serviceType>urn:schemas-upnp-org:service:WANCommonInterfaceConfig:1</serviceType>\n" +
+                "            <serviceId>urn:upnp-org:serviceId:WANCommonIFC1</serviceId>\n" +
+                "            <controlURL>/ctl/CmnIfCfg</controlURL>\n" +
+                "            <eventSubURL>/evt/CmnIfCfg</eventSubURL>\n" +
+                "            <SCPDURL>/WANCfg.xml</SCPDURL>\n" +
+                "          </service>\n" +
+                "        </serviceList>\n" +
+                "        <deviceList>\n" +
+                "          <device>\n" +
+                "            <deviceType>urn:schemas-upnp-org:device:WANConnectionDevice:1</deviceType>\n" +
+                "            <friendlyName>WANConnectionDevice</friendlyName>\n" +
+                "            <serviceList>\n" +
+                "              <service>\n" +
+                "                <serviceType>urn:schemas-upnp-org:service:WANIPConnection:1</serviceType>\n" +
+                "                <controlURL>/ctl/IPConn</controlURL>\n" +
+                "                <eventSubURL>/evt/IPConn</eventSubURL>\n" +
+                "                <SCPDURL>/WANIPCn.xml</SCPDURL>\n" +
+                "              </service>\n" +
+                "            </serviceList>\n" +
+                "          </device>\n" +
+                "        </deviceList>\n" +
+                "      </device>\n" +
+                "    </deviceList>\n" +
+                "  </device>\n" +
+                "</root>";
+
+        final UPnPDevice device = UPnPDevice.fromXml(decl);
+
+        assertEquals("urn:schemas-upnp-org:device:InternetGatewayDevice:1", device.getDeviceType());
+        assertEquals("Ubee EVW3226", device.getFriendlyName());
+    }
 }
