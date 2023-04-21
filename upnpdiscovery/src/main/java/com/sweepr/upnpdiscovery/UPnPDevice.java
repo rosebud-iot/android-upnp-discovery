@@ -10,21 +10,21 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 public class UPnPDevice {
 
-    private static String LOCATION_TEXT = "LOCATION: ";
-    private static String SERVER_TEXT = "SERVER: ";
-    private static String USN_TEXT = "USN: ";
-    private static String ST_TEXT = "ST: ";
+    private static final String LOCATION_TEXT = "LOCATION: ";
+    private static final String SERVER_TEXT = "SERVER: ";
+    private static final String USN_TEXT = "USN: ";
+    private static final String ST_TEXT = "ST: ";
 
     private static final String LINE_END = "\r\n";
 
     // From SSDP Packet
-    private String mHostAddress;
+    private final String mHostAddress;
     // SSDP Packet Header
     private String mHeader;
-    private String mLocation;
-    private String mServer;
-    private String mUSN;
-    private String mST;
+    private final String mLocation;
+    private final String mServer;
+    private final String mUSN;
+    private final String mST;
 
     // XML content
     private String mXML;
@@ -83,7 +83,7 @@ public class UPnPDevice {
                 "URLBase: " + mURLBase;
     }
 
-    private String parseHeader(String mSearchAnswer, String whatSearch) {
+    private static String parseHeader(String mSearchAnswer, String whatSearch) {
         String result = "";
         int searchLinePos = mSearchAnswer.indexOf(whatSearch);
         if (searchLinePos != -1) {
@@ -225,5 +225,4 @@ public class UPnPDevice {
     public String getURLBase() {
         return mURLBase;
     }
-
 }
