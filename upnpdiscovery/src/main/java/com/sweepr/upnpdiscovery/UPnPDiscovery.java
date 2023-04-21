@@ -106,17 +106,17 @@ public class UPnPDiscovery implements Runnable {
                 socket.setBroadcast(true);
                 socket.bind(new InetSocketAddress(port));
 
-                DatagramPacket datagramPacketRequest = new DatagramPacket(query.getBytes(), query.length(), group, port);
+                final DatagramPacket datagramPacketRequest = new DatagramPacket(query.getBytes(), query.length(), group, port);
                 socket.send(datagramPacketRequest);
 
-                final long time = System.currentTimeMillis();
-                long curTime = System.currentTimeMillis();
-                while (curTime - time < 1000) {
+                final long startTime = System.currentTimeMillis();
+                long currentTime = System.currentTimeMillis();
+                while (currentTime - startTime < 1000) {
 
-                    DatagramPacket datagramPacket = new DatagramPacket(new byte[1024], 1024);
+                    final DatagramPacket datagramPacket = new DatagramPacket(new byte[1024], 1024);
                     socket.receive(datagramPacket);
 
-                    String response = new String(datagramPacket.getData(), 0, datagramPacket.getLength());
+                    final String response = new String(datagramPacket.getData(), 0, datagramPacket.getLength());
 
                     if (response.substring(0, 12).equalsIgnoreCase("HTTP/1.1 200")) {
                         final UPnPDevice device = new UPnPDevice(datagramPacket.getAddress().getHostAddress(), response);
@@ -124,7 +124,7 @@ public class UPnPDiscovery implements Runnable {
 
                         getData(device.getLocation(), device);
                     }
-                    curTime = System.currentTimeMillis();
+                    currentTime = System.currentTimeMillis();
                 }
 
             } catch (final IOException e) {
@@ -145,7 +145,7 @@ public class UPnPDiscovery implements Runnable {
 
     private void getData(final String url, final UPnPDevice device) {
         if (url != null && !url.equals("")) {
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+            final StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {
                         @Override
                         public void onResponse(String response) {
